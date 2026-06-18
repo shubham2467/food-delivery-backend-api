@@ -34,9 +34,9 @@ const foodSchema = new mongoose.Schema(
         type:Boolean,
         default:true,
     },
-    resturant:{
+    restaurant:{
         type:mongoose.Schema.ObjectId,
-        ref:'Resturant'
+        ref:'restaurant'
     },
     rating:{
         type:Number,

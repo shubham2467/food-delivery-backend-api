@@ -14,29 +14,39 @@ const adminMiddleware = require("../middlewares/adminMiddleware");
 
 const router = express.Router();
 
-//routes
-
-// GET USER || GET
-router.get("/getUser", authMiddleware, getUserController);
+// GET CURRENT USER
+router.get("/", authMiddleware, getUserController);
 
 // UPDATE PROFILE
-router.put("/updateUser", authMiddleware, updateUserController);
+router.put("/", authMiddleware, updateUserController);
 
-//password update
-router.put("/updatePassword", authMiddleware, updatePasswordController);
-
-//RESET PASSWORD
-router.post("/resetPassword", authMiddleware, resetPasswordController );
-
-//DELETE USER
-router.delete('/deleteUser/:id', authMiddleware, deleteProfileController);
-
-// UPDATE USER ROLE
+// UPDATE PASSWORD
 router.put(
-  "/updateUserRole/:id",
+  "/password",
+  authMiddleware,
+  updatePasswordController
+);
+
+// RESET PASSWORD
+router.post(
+  "/reset-password",
+  authMiddleware,
+  resetPasswordController
+);
+
+// DELETE USER
+router.delete(
+  "/:id",
+  authMiddleware,
+  deleteProfileController
+);
+
+// UPDATE USER ROLE (ADMIN ONLY)
+router.put(
+  "/role/:id",
   authMiddleware,
   adminMiddleware,
-  updateUserRoleController,
+  updateUserRoleController
 );
 
 module.exports = router;

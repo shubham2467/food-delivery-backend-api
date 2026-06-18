@@ -1,6 +1,5 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
-
 const adminMiddleware = require("../middlewares/adminMiddleware");
 
 const {
@@ -14,26 +13,29 @@ const router = express.Router();
 
 // CREATE CATEGORY
 router.post(
-  "/create",
+  "/",
   authMiddleware,
   adminMiddleware,
   createCatController
 );
 
 // GET ALL CATEGORIES
-router.get("/getAll", getAllCatController);
+router.get(
+  "/",
+  getAllCatController
+);
 
-//UPDATE CAT
+// UPDATE CATEGORY
 router.put(
-  "/update/:id",
+  "/:id",
   authMiddleware,
   adminMiddleware,
   updateCatController
 );
 
-//DELETE CAT
+// DELETE CATEGORY
 router.delete(
-  "/delete/:id",
+  "/:id",
   authMiddleware,
   adminMiddleware,
   deleteCatController

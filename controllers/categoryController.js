@@ -1,36 +1,55 @@
 const categoryModel = require("../models/categoryModel");
 
 // CREATE CAT
+// CREATE CATEGORY
 const createCatController = async (req, res) => {
   try {
     const { title, imageUrl } = req.body;
 
-    //valdn
+    // validation
     if (!title) {
-      return res.status(500).send({
+      return res.status(400).send({
         success: false,
-        message: "please provide category title or image",
+        message: "Please provide category title",
       });
     }
 
-    const newCategory = new categoryModel({ title, imageUrl });
+    // Check if category already exists (case-insensitive)
+    const existingCategory = await categoryModel.findOne({
+      title: { $regex: new RegExp(`^${title.trim()}$`, "i") },
+    });
+
+    if (existingCategory) {
+      return res.status(409).send({
+        success: false,
+        message: "Category Already Exists",
+      });
+    }
+
+    const newCategory = new categoryModel({
+      title: title.trim(),
+      imageUrl,
+    });
+
     await newCategory.save();
 
     res.status(201).send({
       success: true,
-      message: "category created",
+      message: "Category Created Successfully",
       newCategory,
     });
+
   } catch (error) {
     console.log(error);
 
     res.status(500).send({
       success: false,
-      message: "Error In Create Cat API",
+      message: "Error In Create Category API",
       error,
     });
   }
 };
+
 //GET ALL CAT
 const getAllCatController = async(req, res) => {
   try{

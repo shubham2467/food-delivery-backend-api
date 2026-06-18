@@ -127,7 +127,7 @@ const getSingleFoodController = async(req, res) => {
 
 //GET FOOD BY RESTURANT
 //GET FOOD BY RESTURANT
-const getFoodByResturantController = async (req, res) => {
+const getFoodByRestaurantController = async (req, res) => {
     try {
 
         const resturantId = req.params.id;
@@ -347,4 +347,4 @@ const getFoodByCategoryController = async (req, res) => {
     });
   }
 };
-module.exports = { createFoodController, getAllFoodsController, getSingleFoodController, getFoodByResturantController, deleteFoodController, updateFoodController, placeOrderController, orderStatusController, getFoodByCategoryController};
+module.exports = { createFoodController, getAllFoodsController, getSingleFoodController, getFoodByRestaurantController, deleteFoodController, updateFoodController, placeOrderController, orderStatusController, getFoodByCategoryController};

@@ -2,51 +2,79 @@ const express = require("express");
 
 const authMiddleware = require("../middlewares/authMiddleware");
 const adminMiddleware = require("../middlewares/adminMiddleware");
-const { createFoodController, getAllFoodsController, getSingleFoodController, getFoodByResturantController, updateFoodController, deleteFoodController, placeOrderController, orderStatusController, getFoodByCategoryController } = require("../controllers/foodController");
 
+const {
+  createFoodController,
+  getAllFoodsController,
+  getSingleFoodController,
+  getFoodByRestaurantController,
+  updateFoodController,
+  deleteFoodController,
+  placeOrderController,
+  orderStatusController,
+  getFoodByCategoryController,
+} = require("../controllers/foodController");
 
 const router = express.Router();
 
-//routes
-//CREATE FOOD
+// CREATE FOOD
 router.post(
-  '/create',
+  "/",
   authMiddleware,
   adminMiddleware,
   createFoodController
 );
 
-//GET ALL FOOD
-router.get('/getAll', getAllFoodsController);
+// GET ALL FOODS
+router.get("/", getAllFoodsController);
 
-//GET SINGLE FOOD
-router.get('/get/:id', getSingleFoodController);
+// GET FOOD BY RESTAURANT
+router.get(
+  "/restaurant/:id",
+  getFoodByRestaurantController
+);
 
-//GET FOOD BY RESTURANT
-router.get('/getByResturant/:id', getFoodByResturantController );
+// GET FOOD BY CATEGORY
+router.get(
+  "/category/:title",
+  getFoodByCategoryController
+);
 
-//UPDATE FOOD
+// GET SINGLE FOOD
+router.get(
+  "/:id",
+  getSingleFoodController
+);
+
+// UPDATE FOOD
 router.put(
-  '/update/:id',
+  "/:id",
   authMiddleware,
   adminMiddleware,
   updateFoodController
 );
 
-//DELETE FOOD
+// DELETE FOOD
 router.delete(
-  '/delete/:id',
+  "/:id",
   authMiddleware,
   adminMiddleware,
   deleteFoodController
 );
 
-//PLACE ORDER
-router.post('/placeorder', authMiddleware, placeOrderController);
+// PLACE ORDER
+router.post(
+  "/place-order",
+  authMiddleware,
+  placeOrderController
+);
 
-//ORDER STATUS
-router.post('/orderStatus/:id', authMiddleware, adminMiddleware, orderStatusController);
+// ORDER STATUS UPDATE
+router.put(
+  "/order-status/:id",
+  authMiddleware,
+  adminMiddleware,
+  orderStatusController
+);
 
-//FOOD CATEGORY
-router.get("/getByCategory/:title", getFoodByCategoryController);
 module.exports = router;

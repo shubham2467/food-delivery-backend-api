@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
 
 //schema
-const resturantSchema = new mongoose.Schema({
+const restaurantSchema = new mongoose.Schema({
     title:{
         type:String,
-        required:[true, "Resturant title is required"],
+        required:[true, "restaurant title is required"],
     },
     imageUrl:{
         type:String,
@@ -53,4 +53,4 @@ const resturantSchema = new mongoose.Schema({
 
 }, { timestamps:true});
 //export
-module.exports = mongoose.model("Resturant", resturantSchema);
+module.exports = mongoose.model("restaurant", restaurantSchema);
