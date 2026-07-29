@@ -3,7 +3,6 @@ const bcrypt = require("bcryptjs");
 const JWT = require("jsonwebtoken");
 
 // REGISTER
-// REGISTER
 const registerController = async (req, res) => {
   try {
 
@@ -28,7 +27,7 @@ const registerController = async (req, res) => {
       !address ||
       !answer
     ) {
-      return res.status(500).send({
+      return res.status(400).send({
         success: false,
         message: "Please Provide All Fields",
       });
@@ -38,15 +37,15 @@ const registerController = async (req, res) => {
     const existing = await userModel.findOne({ email });
 
     if (existing) {
-      return res.status(500).send({
+      return res.status(409).send({
         success: false,
         message: "Email Already Registered Please Login",
       });
     }
 
     // hashing password
-    var salt = bcrypt.genSaltSync(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+   const salt = await bcrypt.genSalt(10);
+   const hashedPassword = await bcrypt.hash(password, salt);
 
     // create user
     const user = await userModel.create({
@@ -88,7 +87,7 @@ const loginController = async (req, res) => {
 
     // validation
     if (!email || !password) {
-      return res.status(500).send({
+      return res.status(400).send({
         success: false,
         message: "Please Provide Email OR Password",
       });
@@ -109,7 +108,7 @@ const loginController = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(500).send({
+      return res.status(401).send({
         success: false,
         message: "Invalid Credentials",
       });

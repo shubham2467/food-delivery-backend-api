@@ -1,6 +1,7 @@
 const foodModel = require("../models/foodModel");
 const orderModel = require("../models/orderModel");
 const categoryModel = require("../models/categoryModel");
+const { redisClient } = require("../config/redis");
 
 //CREATE FOOD
 //CREATE FOOD
@@ -51,6 +52,9 @@ const createFoodController = async (req, res) => {
     });
 
     await newFood.save();
+    // Clear foods cache
+    await redisClient.del("allFoods");
+    console.log("🗑️ Redis Cache Cleared (allFoods)");
 
     res.status(201).send({
       success: true,
@@ -65,33 +69,66 @@ const createFoodController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error in create food API",
-      error,
+      error: error.message,
     });
 
   }
 };
+
 //GET ALL FOOD
-const getAllFoodsController = async(req, res) => {
-    try{
-        const foods = await foodModel.find({})
-        if(!foods){
-            return res.status(404).send({
-                sucess:false,
-                message:'no food items was found'
-            })
+// GET ALL FOOD
+const getAllFoodsController = async (req, res) => {
+    try {
+
+        // 1. Check Redis Cache
+        const cachedFoods = await redisClient.get("allFoods");
+
+        if (cachedFoods) {
+            console.log("✅ Cache Hit");
+
+            return res.status(200).send({
+                success: true,
+                source: "Redis Cache",
+                totalFoods: JSON.parse(cachedFoods).length,
+                foods: JSON.parse(cachedFoods),
+            });
         }
-        res.status(200).send({
+
+        console.log("❌ Cache Miss");
+
+        // 2. Fetch from MongoDB
+        const foods = await foodModel.find({});
+
+        if (!foods || foods.length === 0) {
+            return res.status(404).send({
+                success: false,
+                message: "No food items found",
+            });
+        }
+
+        // 3. Store in Redis for 60 seconds
+        await redisClient.setEx(
+            "allFoods",
+            60,
+            JSON.stringify(foods)
+        );
+
+        // 4. Return MongoDB Data
+        return res.status(200).send({
             success: true,
+            source: "MongoDB",
             totalFoods: foods.length,
             foods,
-        })
-    }catch(error){
-        console.log(error)
-        res.status(500).send({
-            success:false,
-            message:'Error in Get Foods API',
-            error
-        })
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).send({
+            success: false,
+            message: "Error in Get Foods API",
+            error: error.message,
+        });
     }
 };
 
@@ -189,16 +226,20 @@ const updateFoodController = async(req, res) => {
         const updatedFood = await foodModel.findByIdAndUpdate(foodId, {
             title, description, price, imgUrl,foodTags,category,code, isAvailable, resturant, rating
         }, {new:true})
+        // Clear foods cache
+        await redisClient.del("allFoods");
+        console.log("🗑️ Redis Cache Cleared (allFoods)");
         res.status(200).send({
             success:true,
             message:'Food Item Was Updated',
+            updatedFood,
         })
     }catch(error){
         console.log(error),
         res.status(500).send({
             success:false,
             message:'Error in Update Food API',
-            error,
+            error: error.message,
         })
     }
 };
@@ -221,6 +262,9 @@ const deleteFoodController = async(req, res) => {
             })
         }
         await foodModel.findByIdAndDelete(foodId)
+        // Clear foods cache
+        await redisClient.del("allFoods");
+        console.log("🗑️ Redis Cache Cleared (allFoods)");
         res.status(200).send({
             success:true,
             message:'Food item Deleted',
@@ -230,7 +274,7 @@ const deleteFoodController = async(req, res) => {
         res.status(500).send({
             success:false,
             message:'Error in delete food API',
-            error,
+            error: error.message,
         })
     }
 };
@@ -306,7 +350,7 @@ const orderStatusController = async(req, res) => {
         res.status(500).send({
             success:false,
             message:'Error In Order Status API',
-            error,
+            error: error.message,
         })
     }
 };
@@ -343,7 +387,7 @@ const getFoodByCategoryController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error In Get Food By Category API",
-      error,
+      error: error.message,
     });
   }
 };
