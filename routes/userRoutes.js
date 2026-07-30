@@ -27,13 +27,6 @@ router.put(
   updatePasswordController
 );
 
-// RESET PASSWORD
-router.post(
-  "/reset-password",
-  authMiddleware,
-  resetPasswordController
-);
-
 // DELETE USER
 router.delete(
   "/:id",
