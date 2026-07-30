@@ -12,7 +12,7 @@ A scalable backend system for a food delivery platform built with **Node.js**, *
 - Restaurant management
 - Food management
 - Category management
-- Password reset and password update
+- Password update for authenticated users
 - Order placement and order status tracking
 - Logout with token invalidation
 - Redis caching support
