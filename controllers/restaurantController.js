@@ -1,4 +1,5 @@
 const restaurantModel = require("../models/restaurantModel");
+const { redisClient } = require("../config/redis");
 
 // CREATE RESTAURANT
 const createRestaurantController = async (req, res) => {
@@ -18,7 +19,7 @@ const createRestaurantController = async (req, res) => {
       coords,
     } = req.body;
 
-    // validation
+    // Validation
     if (!title || !coords) {
       return res.status(400).send({
         success: false,
@@ -26,7 +27,7 @@ const createRestaurantController = async (req, res) => {
       });
     }
 
-    // create new restaurant
+    // Create restaurant
     const newRestaurant = new restaurantModel({
       title,
       imageUrl,
@@ -42,8 +43,10 @@ const createRestaurantController = async (req, res) => {
       coords,
     });
 
-    // save data
     await newRestaurant.save();
+
+    // Clear Redis cache
+    await redisClient.del("restaurants");
 
     res.status(201).send({
       success: true,
@@ -65,6 +68,21 @@ const createRestaurantController = async (req, res) => {
 // GET ALL RESTAURANTS
 const getAllRestaurantController = async (req, res) => {
   try {
+    console.log("Restaurant API called");
+
+    // Check Redis cache
+    const cachedRestaurants = await redisClient.get("restaurants");
+
+    if (cachedRestaurants) {
+      return res.status(200).send({
+        success: true,
+        source: "Redis Cache",
+        totalCount: JSON.parse(cachedRestaurants).length,
+        restaurants: JSON.parse(cachedRestaurants),
+      });
+    }
+
+    // Fetch from MongoDB
     const restaurants = await restaurantModel.find({});
 
     if (!restaurants || restaurants.length === 0) {
@@ -74,16 +92,25 @@ const getAllRestaurantController = async (req, res) => {
       });
     }
 
-    res.status(200).send({
+    // Store data in Redis for 5 minutes
+    await redisClient.set(
+      "restaurants",
+      JSON.stringify(restaurants),
+      {
+        EX: 300,
+      }
+    );
+
+    return res.status(200).send({
       success: true,
+      source: "MongoDB",
       totalCount: restaurants.length,
       restaurants,
     });
-
   } catch (error) {
     console.log(error);
 
-    res.status(500).send({
+    return res.status(500).send({
       success: false,
       message: "Error In Get All Restaurant API",
       error: error.message,
@@ -123,7 +150,7 @@ const getRestaurantByIdController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error In Get Restaurant By ID API",
-      error,
+      error: error.message,
     });
   }
 };
@@ -136,23 +163,28 @@ const deleteRestaurantController = async (req, res) => {
     if (!restaurantId) {
       return res.status(404).send({
         success: false,
-        message: "No Restaurant Found OR Provide Restaurant ID",
+        message: "Please provide restaurant ID",
       });
     }
 
-    await restaurantModel.findByIdAndDelete(restaurantId);
+    const restaurant = await restaurantModel.findByIdAndDelete(
+      restaurantId
+    );
+
+    if (!restaurant) {
+      return res.status(404).send({
+        success: false,
+        message: "Restaurant not found",
+      });
+    }
+
+    // Clear Redis cache
+    await redisClient.del("restaurants");
 
     res.status(200).send({
       success: true,
       message: "Restaurant Deleted Successfully",
     });
-
-    if (!restaurantId) {
-      return res.status(500).send({
-        success: false,
-        message: "No Restaurant Found",
-      });
-    }
 
   } catch (error) {
     console.log(error);
@@ -160,7 +192,7 @@ const deleteRestaurantController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error In Delete Restaurant API",
-      error,
+      error: error.message,
     });
   }
 };
@@ -170,11 +202,12 @@ const updateRestaurantController = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const updatedRestaurant = await restaurantModel.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true }
-    );
+    const updatedRestaurant =
+      await restaurantModel.findByIdAndUpdate(
+        id,
+        req.body,
+        { new: true }
+      );
 
     if (!updatedRestaurant) {
       return res.status(404).send({
@@ -182,6 +215,9 @@ const updateRestaurantController = async (req, res) => {
         message: "Restaurant Not Found",
       });
     }
+
+    // Clear Redis cache
+    await redisClient.del("restaurants");
 
     res.status(200).send({
       success: true,
@@ -195,7 +231,7 @@ const updateRestaurantController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error In Update Restaurant API",
-      error,
+      error: error.message,
     });
   }
 };
