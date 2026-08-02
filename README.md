@@ -210,6 +210,16 @@ The application is deployed on Northflank and uses:
 - Upstash Redis
 - Node.js runtime
 
+## Swagger API documentation
+
+When the server is running, open the interactive documentation at:
+
+```text
+/api-docs
+```
+
+The raw OpenAPI 3 specification is also available at `/api-docs.json`. For protected endpoints, use **Authorize** in Swagger UI and enter the JWT returned by the login endpoint.
+
 ---
 
 # 📌 Future Improvements
