@@ -17,7 +17,7 @@ const createFoodController = async (req, res) => {
       category,
       code,
       isAvailable,
-      resturant,
+      restaurant,
       rating,
       ratingCount,
     } = req.body;

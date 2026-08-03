@@ -89,7 +89,7 @@ const swaggerDefinition = {
         properties: {
           _id: objectId, title: { type: "string", example: "Paneer Pizza" }, description: { type: "string" }, price: { type: "number", example: 299 },
           imgUrl: { type: "string", format: "uri" }, foodTags: { type: "string", example: "cheese,spicy" }, category: objectId,
-          code: { type: "string", example: "FD001" }, isAvailable: { type: "boolean", default: true }, resturant: objectId,
+          code: { type: "string", example: "FD001" }, isAvailable: { type: "boolean", default: true }, restaurant: objectId,
           rating: { type: "number", minimum: 1, maximum: 5 }, ratingCount: { type: "string" },
         },
       },
