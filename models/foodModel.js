@@ -30,7 +30,7 @@ const foodSchema = new mongoose.Schema(
     code:{
         type:String,
     },
-    isAvailabe:{
+    isAvailable:{
         type:Boolean,
         default:true,
     },
