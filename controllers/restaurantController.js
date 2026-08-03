@@ -197,15 +197,16 @@ const deleteRestaurantController = async (req, res) => {
   }
 };
 
-// UPDATE RESTAURANT
 const updateRestaurantController = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const { _id, ...updateData } = req.body;
+
     const updatedRestaurant =
       await restaurantModel.findByIdAndUpdate(
         id,
-        req.body,
+        updateData,
         { new: true }
       );
 
@@ -216,7 +217,6 @@ const updateRestaurantController = async (req, res) => {
       });
     }
 
-    // Clear Redis cache
     await redisClient.del("restaurants");
 
     res.status(200).send({
@@ -226,8 +226,6 @@ const updateRestaurantController = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
-
     res.status(500).send({
       success: false,
       message: "Error In Update Restaurant API",
